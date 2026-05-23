@@ -35,13 +35,22 @@ def search_leads(
         )
 
     dataset_id = run.default_dataset_id if hasattr(run, "default_dataset_id") else run["defaultDatasetId"]
-    return list(client.dataset(dataset_id).iterate_items())
+    items = list(client.dataset(dataset_id).iterate_items())
+    # Detect free-plan API block: actor returns a single {"error": "..."} item
+    if len(items) == 1 and "error" in items[0] and not items[0].get("email"):
+        raise RuntimeError(
+            f"Leads Finder API blocked: {items[0]['error']} "
+            "Upgrade to Apify Starter plan ($49/mo) to call this actor via API."
+        )
+    return items
 
 
 def extract_people(items: list[dict]) -> list[dict]:
     """Normalize leads-finder output to the project's standard lead schema."""
     people = []
     for item in items:
+        if "error" in item:
+            continue
         people.append({
             "first_name": item.get("firstName") or item.get("first_name", ""),
             "last_name": item.get("lastName") or item.get("last_name", ""),
