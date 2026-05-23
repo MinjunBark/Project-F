@@ -6,7 +6,7 @@ from utils.gemini import generate as _gemini_generate
 
 _SIGNAL_KEYWORDS = {
     "genesys": "Genesys",
-    "nice": "NICE",
+    "nice incontact": "NICE InContact",
     "five9": "Five9",
     "avaya": "Avaya",
     "salesforce": "Salesforce",
@@ -26,7 +26,7 @@ def _filter_tech_signals(tech_str: str) -> list[str]:
 
 
 def _map_pain_points(industry: str, all_pain_points: list[str]) -> list[str]:
-    industry_lower = industry.lower()
+    industry_lower = (industry or "").lower()
     compliance = [p for p in all_pain_points if "compliance" in p.lower()]
     other = [p for p in all_pain_points if "compliance" not in p.lower()]
     if any(c in industry_lower for c in _COMPLIANCE_INDUSTRIES) and compliance:
@@ -39,7 +39,7 @@ def build_outreach_prompt(lead: dict, intel: dict) -> str:
     icp = intel.get("ideal_customer_profile", {})
     tech_signals = _filter_tech_signals(lead.get("company_technologies", ""))
     pain_points = _map_pain_points(lead.get("company_industry", ""), icp.get("pain_points", []))
-    keywords = [k.strip() for k in (lead.get("company_keywords") or "").split(",")][:5]
+    keywords = [k.strip() for k in (lead.get("company_keywords") or "").split(",") if k.strip()][:5]
     differentiators = positioning.get("differentiators", [])[:3]
 
     lines = [

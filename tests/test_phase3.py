@@ -94,3 +94,26 @@ def test_generate_outreach_returns_required_keys():
     result = generate_outreach(mock_gemini, SAMPLE_LEAD, SAMPLE_INTEL)
     for key in ["email_subject", "email_body", "call_script", "linkedin_message"]:
         assert key in result
+
+
+def test_generate_outreach_returns_error_key_on_exception():
+    from modules.phase3_outreach import generate_outreach
+    mock_gemini = MagicMock()
+    mock_gemini.models.generate_content.side_effect = RuntimeError("quota exceeded")
+    result = generate_outreach(mock_gemini, SAMPLE_LEAD, SAMPLE_INTEL)
+    assert "error" in result
+    assert result["email_subject"] == ""
+
+
+def test_save_and_load_outreach_round_trip(tmp_path):
+    from modules.phase3_outreach import save_outreach, load_outreach
+    results = [{"email_subject": "Test", "email_body": "Body", "call_script": "Script", "linkedin_message": "LI"}]
+    save_outreach("Cresta", results, data_dir=str(tmp_path))
+    loaded = load_outreach("Cresta", data_dir=str(tmp_path))
+    assert loaded == results
+
+
+def test_load_outreach_returns_none_when_missing(tmp_path):
+    from modules.phase3_outreach import load_outreach
+    result = load_outreach("NonExistent", data_dir=str(tmp_path))
+    assert result is None
