@@ -219,15 +219,13 @@ def test_load_leads_round_trips_data(tmp_path):
     assert loaded[0]["name"] == "Jane Doe"
 
 
-def test_load_seen_returns_empty_set_if_no_file(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
+def test_load_seen_returns_empty_set_if_no_file(tmp_path):
     from modules.phase2_prospecting import load_seen
-    result = load_seen("TestCo")
+    result = load_seen("TestCo", data_dir=str(tmp_path))
     assert result == set()
 
 
-def test_filter_seen_removes_contacts_with_known_email(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
+def test_filter_seen_removes_contacts_with_known_email():
     from modules.phase2_prospecting import filter_seen
     leads = [
         {"email": "known@acme.com", "linkedin_url": ""},
@@ -239,15 +237,14 @@ def test_filter_seen_removes_contacts_with_known_email(tmp_path, monkeypatch):
     assert result[0]["email"] == "new@acme.com"
 
 
-def test_save_seen_persists_emails_and_linkedin_urls(tmp_path, monkeypatch):
-    monkeypatch.chdir(tmp_path)
+def test_save_seen_persists_emails_and_linkedin_urls(tmp_path):
     from modules.phase2_prospecting import save_seen, load_seen
     leads = [
         {"email": "jane@acme.com", "linkedin_url": "https://linkedin.com/in/jane"},
         {"email": "", "linkedin_url": "https://linkedin.com/in/bob"},
     ]
-    save_seen("TestCo", leads, set())
-    seen = load_seen("TestCo")
+    save_seen("TestCo", leads, set(), data_dir=str(tmp_path))
+    seen = load_seen("TestCo", data_dir=str(tmp_path))
     assert "jane@acme.com" in seen
     assert "https://linkedin.com/in/jane" in seen
     assert "https://linkedin.com/in/bob" in seen

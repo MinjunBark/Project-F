@@ -111,12 +111,12 @@ def load_leads(company_name: str, data_dir: str = "data") -> list[dict] | None:
     return data.get("leads")
 
 
-def _seen_path(company_name: str) -> Path:
-    return Path("data") / company_name.lower().replace(" ", "_") / "seen_leads.json"
+def _seen_path(company_name: str, data_dir: str = "data") -> Path:
+    return Path(data_dir) / company_name.lower().replace(" ", "_") / "seen_leads.json"
 
 
-def load_seen(company_name: str) -> set:
-    path = _seen_path(company_name)
+def load_seen(company_name: str, data_dir: str = "data") -> set:
+    path = _seen_path(company_name, data_dir)
     if not path.exists():
         return set()
     data = json.loads(path.read_text(encoding="utf-8"))
@@ -127,13 +127,13 @@ def filter_seen(leads: list[dict], seen: set) -> list[dict]:
     fresh = []
     for lead in leads:
         key = lead.get("email") or lead.get("linkedin_url")
-        if key and key not in seen:
+        if key is None or key not in seen:
             fresh.append(lead)
     return fresh
 
 
-def save_seen(company_name: str, leads: list[dict], existing_seen: set):
-    path = _seen_path(company_name)
+def save_seen(company_name: str, leads: list[dict], existing_seen: set, data_dir: str = "data"):
+    path = _seen_path(company_name, data_dir)
     updated = set(existing_seen)
     for lead in leads:
         if lead.get("email"):
