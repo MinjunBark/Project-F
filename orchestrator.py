@@ -150,6 +150,8 @@ def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
             people = extract_leads_finder_people(items)
             all_people.extend(people)
             print(f"    -> {len(people)} candidates found")
+        except RuntimeError:
+            raise
         except Exception as e:
             print(f"  WARNING: Leads Finder search failed: {e}")
 
