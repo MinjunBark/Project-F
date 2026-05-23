@@ -9,7 +9,7 @@ def build_apollo_queries(intel: dict) -> list[dict]:
     return [
         {
             "titles": titles,
-            "employee_ranges": ["100,1000", "1000,10000"],
+            "employee_ranges": ["201,500", "501,1000", "1001,2000", "2001,5000", "5001,10000"],
         }
     ]
 

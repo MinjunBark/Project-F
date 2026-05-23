@@ -40,12 +40,12 @@ def test_search_people_posts_to_correct_url():
         assert "apollo.io" in mock_post.call_args[0][0]
 
 
-def test_search_people_includes_api_key_in_body():
+def test_search_people_includes_api_key_in_header():
     with patch("utils.apollo.requests.post", return_value=_mock_post(SAMPLE_APOLLO_RESPONSE)) as mock_post:
         from utils.apollo import search_people
-        search_people("my_key", titles=["VP of CX"], employee_ranges=["100,1000"])
-        body = mock_post.call_args[1]["json"]
-        assert body["api_key"] == "my_key"
+        search_people("my_key", titles=["VP of CX"], employee_ranges=["501,1000"])
+        headers = mock_post.call_args[1]["headers"]
+        assert headers["X-Api-Key"] == "my_key"
 
 
 def test_search_people_returns_response_dict():

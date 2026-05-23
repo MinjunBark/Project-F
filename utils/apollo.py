@@ -13,13 +13,16 @@ def search_people(
     response = requests.post(
         f"{APOLLO_BASE_URL}/mixed_people/search",
         json={
-            "api_key": api_key,
             "page": page,
             "per_page": per_page,
             "person_titles": titles,
             "organization_num_employees_ranges": employee_ranges,
         },
-        headers={"Content-Type": "application/json", "Cache-Control": "no-cache"},
+        headers={
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache",
+            "X-Api-Key": api_key,
+        },
     )
     response.raise_for_status()
     return response.json()
