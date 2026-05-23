@@ -1,10 +1,14 @@
 import argparse
+import io
 import json
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
+
+if sys.platform == "win32":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 import config
 from modules.phase1_intel import build_scraping_tasks, prepare_claude_prompt, save_intel, load_intel
