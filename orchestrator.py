@@ -205,6 +205,10 @@ def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
 
 
 def run_phase3(company: dict, state: dict, resume: bool) -> list[dict] | None:
+    """
+    Generates personalised outreach templates (email, call script, LinkedIn) for each
+    scored lead using Gemini 2.0 Flash. Saves to outreach.json and returns the results.
+    """
     company_name = company["Company Name"]
 
     if resume and "phase3" in state["completed_phases"]:
