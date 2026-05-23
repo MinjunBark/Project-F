@@ -105,3 +105,41 @@ def write_leads(client: gspread.Client, spreadsheet_id: str,
         ])
     if rows:
         sheet.append_rows(rows)
+
+
+def write_outreach(client: gspread.Client, spreadsheet_id: str,
+                   company_name: str, results: list[dict]):
+    spreadsheet = client.open_by_key(spreadsheet_id)
+    sheet_name = f"{company_name} — Outreach"
+    try:
+        sheet = spreadsheet.worksheet(sheet_name)
+    except gspread.WorksheetNotFound:
+        sheet = spreadsheet.add_worksheet(title=sheet_name, rows=200, cols=12)
+
+    sheet.clear()
+    sheet.append_row([
+        "Company", "Industry", "First Name", "Last Name", "Title",
+        "Email", "LinkedIn URL", "Stars", "Email Subject", "Email Body",
+        "Call Script", "LinkedIn Message",
+    ])
+
+    sorted_results = sorted(results, key=lambda r: r.get("scoring", {}).get("stars", 0), reverse=True)
+    rows = [
+        [
+            r.get("company_name", ""),
+            r.get("company_industry", ""),
+            r.get("first_name", ""),
+            r.get("last_name", ""),
+            r.get("title", ""),
+            r.get("email", ""),
+            r.get("linkedin_url", ""),
+            r.get("scoring", {}).get("stars", ""),
+            r.get("email_subject", ""),
+            r.get("email_body", ""),
+            r.get("call_script", ""),
+            r.get("linkedin_message", ""),
+        ]
+        for r in sorted_results
+    ]
+    if rows:
+        sheet.append_rows(rows)

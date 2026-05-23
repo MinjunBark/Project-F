@@ -126,3 +126,52 @@ def test_write_leads_appends_lead_data_rows():
     assert len(rows) == 1
     assert rows[0][0] == 4   # Stars
     assert rows[0][7] == "VP of CX"  # Title (index 7)
+
+
+def _sample_outreach(stars=4):
+    return {
+        "first_name": "Jane",
+        "last_name": "Doe",
+        "title": "VP of CX",
+        "email": "jane@acme.com",
+        "linkedin_url": "https://linkedin.com/in/janedoe",
+        "company_name": "Acme Corp",
+        "company_industry": "Telecommunications",
+        "scoring": {"stars": stars},
+        "email_subject": "AI for your contact center",
+        "email_body": "Hi Jane, Cresta helps telecom teams...",
+        "call_script": "Opener | Q1 | Q2 | Pitch",
+        "linkedin_message": "Hi Jane, would love to connect.",
+    }
+
+
+def test_write_outreach_creates_worksheet_when_missing():
+    mock_sheet = MagicMock()
+    mock_client, mock_spreadsheet, _ = _mock_spreadsheet_with_missing_sheet(mock_sheet)
+    from utils.sheets import write_outreach
+    write_outreach(mock_client, "fake_id", "Cresta", [_sample_outreach()])
+    mock_spreadsheet.add_worksheet.assert_called_once()
+
+
+def test_write_outreach_writes_correct_headers():
+    mock_sheet = MagicMock()
+    mock_client, mock_spreadsheet, _ = _mock_spreadsheet_with_missing_sheet(mock_sheet)
+    from utils.sheets import write_outreach
+    write_outreach(mock_client, "fake_id", "Cresta", [_sample_outreach()])
+    headers = mock_sheet.append_row.call_args[0][0]
+    assert headers[0] == "Company"
+    assert "Email Subject" in headers
+    assert "LinkedIn Message" in headers
+
+
+def test_write_outreach_sorts_rows_by_stars_descending():
+    mock_sheet = MagicMock()
+    mock_client, mock_spreadsheet, _ = _mock_spreadsheet_with_missing_sheet(mock_sheet)
+    from utils.sheets import write_outreach
+    leads = [_sample_outreach(stars=3), _sample_outreach(stars=5), _sample_outreach(stars=4)]
+    write_outreach(mock_client, "fake_id", "Cresta", leads)
+    rows = mock_sheet.append_rows.call_args[0][0]
+    # Stars is column index 7: Company(0) Industry(1) First(2) Last(3) Title(4) Email(5) LinkedIn(6) Stars(7)
+    assert rows[0][7] == 5
+    assert rows[1][7] == 4
+    assert rows[2][7] == 3
