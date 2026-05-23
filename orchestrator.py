@@ -6,8 +6,8 @@ from pathlib import Path
 
 import config
 from modules.phase1_intel import build_scraping_tasks, prepare_claude_prompt, save_intel, load_intel
-from modules.phase2_prospecting import build_apollo_queries, score_lead, filter_leads, save_leads, load_leads
-from utils.apollo import search_people, extract_people
+from modules.phase2_prospecting import build_apollo_queries, score_lead, filter_leads, save_leads, load_leads, load_seen, filter_seen, save_seen
+from utils.leads_finder import search_leads, extract_people as extract_leads_finder_people
 from utils.apify import get_client as get_apify_client, scrape_website, search_google
 from utils.discord import phase_complete, phase_error
 from utils.hunter import verify_email, find_email
@@ -111,7 +111,7 @@ def run_phase1(company: dict, state: dict, resume: bool) -> dict | None:
 
 def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
     """
-    Searches Apollo for ICP-matched leads, scores them, verifies emails with Hunter,
+    Searches for ICP-matched leads via Apify leads-finder, scores them, verifies emails with Hunter,
     and saves results. Returns lead list if complete, None if phase is blocked.
     """
     company_name = company["Company Name"]
@@ -133,25 +133,28 @@ def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
 
     icp = intel.get("ideal_customer_profile", {})
     queries = build_apollo_queries(intel)
+    seen = load_seen(company_name)
+    apify = get_apify_client(config.APIFY_TOKEN)
     all_people = []
 
     for query in queries:
         label = ", ".join(query["titles"][:2])
-        print(f"  Searching Apollo: {label[:70]}...")
+        print(f"  Searching Leads Finder: {label[:70]}...")
         try:
-            response = search_people(
-                config.APOLLO_API_KEY,
-                titles=query["titles"],
-                employee_ranges=query["employee_ranges"],
-                per_page=25,
+            items = search_leads(
+                apify,
+                job_titles=query["titles"],
+                company_sizes=["201-500", "501-1000", "1001-5000", "5001-10000"],
+                limit=config.MAX_LEADS_PER_RUN * 3,
             )
-            people = extract_people(response)
+            people = extract_leads_finder_people(items)
             all_people.extend(people)
             print(f"    -> {len(people)} candidates found")
         except Exception as e:
-            print(f"  WARNING: Apollo search failed: {e}")
+            print(f"  WARNING: Leads Finder search failed: {e}")
 
-    print(f"  Total candidates: {len(all_people)}")
+    all_people = filter_seen(all_people, seen)
+    print(f"  Total candidates (after dedup): {len(all_people)}")
 
     scored = []
     for person in all_people:
@@ -193,6 +196,7 @@ def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
                 print(f"  WARNING: Hunter find failed for {lead.get('name', '')}: {e}")
 
     filepath = save_leads(company_name, leads)
+    save_seen(company_name, leads, seen)
     print(f"  Leads saved: {filepath} ({len(leads)} leads)")
 
     return leads
