@@ -6,9 +6,18 @@ from pathlib import Path
 
 import config
 from modules.phase1_intel import build_scraping_tasks, prepare_claude_prompt, save_intel, load_intel
+from modules.phase2_prospecting import build_apollo_queries, score_lead, filter_leads, save_leads, load_leads
+from utils.apollo import search_people, extract_people
 from utils.apify import get_client as get_apify_client, scrape_website, search_google
 from utils.discord import phase_complete, phase_error
-from utils.sheets import get_client as get_sheets_client, get_company, update_company_last_run, write_company_intel
+from utils.hunter import verify_email, find_email
+from utils.sheets import (
+    get_client as get_sheets_client,
+    get_company,
+    update_company_last_run,
+    write_company_intel,
+    write_leads,
+)
 
 
 def _state_path(company_name: str) -> Path:
@@ -100,6 +109,95 @@ def run_phase1(company: dict, state: dict, resume: bool) -> dict | None:
     return None  # Signals human action required
 
 
+def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
+    """
+    Searches Apollo for ICP-matched leads, scores them, verifies emails with Hunter,
+    and saves results. Returns lead list if complete, None if phase is blocked.
+    """
+    company_name = company["Company Name"]
+
+    if resume and "phase2" in state["completed_phases"]:
+        existing = load_leads(company_name)
+        if existing:
+            print("  [SKIP] Phase 2 already complete. Loading existing leads.")
+            return existing
+
+    intel = load_intel(company_name)
+    if not intel:
+        print("  ERROR: No intel found for phase 2. Run Phase 1 first.")
+        return None
+
+    print("\n" + "=" * 60)
+    print("PHASE 2: PROSPECTING")
+    print("=" * 60)
+
+    icp = intel.get("ideal_customer_profile", {})
+    queries = build_apollo_queries(intel)
+    all_people = []
+
+    for query in queries:
+        label = ", ".join(query["titles"][:2])
+        print(f"  Searching Apollo: {label[:70]}...")
+        try:
+            response = search_people(
+                config.APOLLO_API_KEY,
+                titles=query["titles"],
+                employee_ranges=query["employee_ranges"],
+                per_page=25,
+            )
+            people = extract_people(response)
+            all_people.extend(people)
+            print(f"    -> {len(people)} candidates found")
+        except Exception as e:
+            print(f"  WARNING: Apollo search failed: {e}")
+
+    print(f"  Total candidates: {len(all_people)}")
+
+    scored = []
+    for person in all_people:
+        scoring = score_lead(person, icp)
+        scored.append({**person, "scoring": scoring})
+
+    leads = filter_leads(
+        scored,
+        min_stars=config.MIN_STAR_RATING_FOR_OUTREACH,
+        max_leads=config.MAX_LEADS_PER_RUN,
+    )
+    print(f"  Qualified leads ({config.MIN_STAR_RATING_FOR_OUTREACH}+ stars): {len(leads)}")
+
+    print("  Verifying emails with Hunter.io...")
+    for lead in leads:
+        if lead.get("email"):
+            try:
+                result = verify_email(config.HUNTER_API_KEY, lead["email"])
+                lead["email_status"] = result["status"]
+                lead["hunter_score"] = result["score"]
+            except Exception as e:
+                print(f"  WARNING: Hunter verify failed for {lead.get('email', '')}: {e}")
+        elif lead.get("company_website"):
+            domain = (
+                lead["company_website"]
+                .replace("https://", "")
+                .replace("http://", "")
+                .split("/")[0]
+            )
+            try:
+                result = find_email(
+                    config.HUNTER_API_KEY, domain, lead["first_name"], lead["last_name"]
+                )
+                if result["email"]:
+                    lead["email"] = result["email"]
+                    lead["email_status"] = "found"
+                    lead["hunter_score"] = result["confidence"]
+            except Exception as e:
+                print(f"  WARNING: Hunter find failed for {lead.get('name', '')}: {e}")
+
+    filepath = save_leads(company_name, leads)
+    print(f"  Leads saved: {filepath} ({len(leads)} leads)")
+
+    return leads
+
+
 def main():
     parser = argparse.ArgumentParser(description="Project F Lead Generation Orchestrator")
     parser.add_argument("--company", required=True, help="Company name (must match Company List sheet)")
@@ -154,6 +252,30 @@ def main():
                     f"Company intel built — ICP extracted. Sheet 2 updated."
                 )
             print("  [OK] Phase 1 complete. Intel written to Google Sheets.")
+
+    # --- Phase 2 ---
+    if not args.phase or args.phase == 2:
+        if args.phase == 2 or "phase1" in state["completed_phases"]:
+            leads = run_phase2(company, state, args.resume)
+
+            if leads is None:
+                print("\nRun paused — Phase 2 could not complete.")
+                return
+
+            if "phase2" not in state["completed_phases"]:
+                print("\n  Writing leads to Google Sheets...")
+                write_leads(sheets, config.SPREADSHEET_ID, company["Company Name"], leads)
+                state["completed_phases"].append("phase2")
+                save_state(args.company, state)
+
+                if config.DISCORD_WEBHOOK_LEADS:
+                    phase_complete(
+                        config.DISCORD_WEBHOOK_LEADS,
+                        "phase2",
+                        company["Company Name"],
+                        f"{len(leads)} leads scored and saved. Leads sheet updated.",
+                    )
+                print(f"  [OK] Phase 2 complete. {len(leads)} leads written to Google Sheets.")
 
     # Update last run tracking
     update_company_last_run(sheets, config.SPREADSHEET_ID, args.company)
