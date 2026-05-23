@@ -102,3 +102,25 @@ def test_extract_people_returns_empty_for_empty_input():
     from utils.leads_finder import extract_people
     result = extract_people([])
     assert result == []
+
+
+def test_search_leads_raises_runtime_error_on_forbidden():
+    from utils.leads_finder import search_leads
+
+    class _FakeForbidden(Exception):
+        pass
+
+    mock_client = MagicMock()
+    mock_client.actor.return_value.call.side_effect = _FakeForbidden
+
+    with patch("utils.leads_finder.ForbiddenError", _FakeForbidden):
+        with pytest.raises(RuntimeError, match="permission approval"):
+            search_leads(mock_client, job_titles=["CEO"])
+
+
+def test_search_leads_passes_industry_when_provided():
+    mock_client = _make_mock_client([])
+    from utils.leads_finder import search_leads
+    search_leads(mock_client, job_titles=["VP"], industry="Software")
+    run_input = mock_client.actor.return_value.call.call_args[1]["run_input"]
+    assert run_input.get("industry") == "Software"
