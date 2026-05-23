@@ -46,7 +46,7 @@ def run_phase1(company: dict, state: dict, resume: bool) -> dict | None:
     # If intel file already exists from a previous partial run, load it
     existing = load_intel(company_name)
     if existing and resume:
-        print("  [FOUND] Intel file exists — writing to Sheets and marking complete.")
+        print("  [FOUND] Intel file exists — will write to Sheets if not already complete.")
         return existing
 
     print("\n" + "=" * 60)
@@ -64,11 +64,11 @@ def run_phase1(company: dict, state: dict, resume: bool) -> dict | None:
             if task["type"] == "website":
                 pages = scrape_website(apify, task["url"], max_pages=task.get("max_pages", 10))
                 scraped_data.extend(pages)
-                print(f"    → {len(pages)} pages collected")
+                print(f"    -> {len(pages)} pages collected")
             elif task["type"] == "news":
                 results = search_google(apify, task["query"])
                 scraped_data.extend(results)
-                print(f"    → {len(results)} results collected")
+                print(f"    -> {len(results)} results collected")
         except Exception as e:
             print(f"  WARNING: scrape failed for {label[:60]}: {e}")
 
@@ -77,12 +77,12 @@ def run_phase1(company: dict, state: dict, resume: bool) -> dict | None:
     company_dir.mkdir(parents=True, exist_ok=True)
 
     raw_path = company_dir / "phase1_raw.json"
-    with open(raw_path, "w") as f:
-        json.dump(scraped_data, f, indent=2)
+    with open(raw_path, "w", encoding="utf-8") as f:
+        json.dump(scraped_data, f, indent=2, ensure_ascii=False)
 
     prompt = prepare_claude_prompt(company_name, scraped_data)
     prompt_path = company_dir / "phase1_prompt.txt"
-    with open(prompt_path, "w") as f:
+    with open(prompt_path, "w", encoding="utf-8") as f:
         f.write(prompt)
 
     print(f"\n  Raw data saved:  {raw_path}  ({len(scraped_data)} items)")
@@ -153,7 +153,7 @@ def main():
                     company["Company Name"],
                     f"Company intel built — ICP extracted. Sheet 2 updated."
                 )
-            print("  ✓ Phase 1 complete. Intel written to Google Sheets.")
+            print("  [OK] Phase 1 complete. Intel written to Google Sheets.")
 
     # Update last run tracking
     update_company_last_run(sheets, config.SPREADSHEET_ID, args.company)

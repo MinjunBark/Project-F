@@ -12,8 +12,9 @@ def scrape_website(client: ApifyClient, url: str, max_pages: int = 10) -> list[d
         "maxCrawlPages": max_pages,
         "crawlerType": "cheerio",
     })
+    dataset_id = run.default_dataset_id if hasattr(run, "default_dataset_id") else run["defaultDatasetId"]
     results = []
-    for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+    for item in client.dataset(dataset_id).iterate_items():
         results.append({
             "url": item.get("url", ""),
             "title": item.get("metadata", {}).get("title", ""),
@@ -30,8 +31,9 @@ def search_google(client: ApifyClient, query: str, max_results: int = 5) -> list
         "resultsPerPage": max_results,
         "countryCode": "us",
     })
+    dataset_id = run.default_dataset_id if hasattr(run, "default_dataset_id") else run["defaultDatasetId"]
     results = []
-    for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+    for item in client.dataset(dataset_id).iterate_items():
         for r in item.get("organicResults", []):
             results.append({
                 "title": r.get("title", ""),
