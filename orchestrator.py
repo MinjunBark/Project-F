@@ -1,12 +1,16 @@
 import argparse
 import json
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 import config
 from modules.phase1_intel import build_scraping_tasks, prepare_claude_prompt, save_intel, load_intel
 from modules.phase2_prospecting import build_apollo_queries, score_lead, filter_leads, save_leads, load_leads, load_seen, filter_seen, save_seen
+from utils.gemini import get_client as get_gemini_client
+from modules.phase3_outreach import generate_outreach, save_outreach, load_outreach
 from utils.leads_finder import search_leads, extract_people as extract_leads_finder_people
 from utils.apify import get_client as get_apify_client, scrape_website, search_google
 from utils.discord import phase_complete, phase_error
@@ -17,6 +21,7 @@ from utils.sheets import (
     update_company_last_run,
     write_company_intel,
     write_leads,
+    write_outreach,
 )
 
 
@@ -144,7 +149,7 @@ def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
             items = search_leads(
                 apify,
                 job_titles=query["titles"],
-                company_sizes=["201-500", "501-1000", "1001-5000", "5001-10000"],
+                company_sizes=["201 - 500", "501 - 1000", "1001 - 5000", "5001 - 10000"],
                 limit=config.MAX_LEADS_PER_RUN * 3,
             )
             people = extract_leads_finder_people(items)
@@ -180,12 +185,7 @@ def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
             except Exception as e:
                 print(f"  WARNING: Hunter verify failed for {lead.get('email', '')}: {e}")
         elif lead.get("company_website"):
-            domain = (
-                lead["company_website"]
-                .replace("https://", "")
-                .replace("http://", "")
-                .split("/")[0]
-            )
+            domain = urlparse(lead["company_website"]).netloc
             try:
                 result = find_email(
                     config.HUNTER_API_KEY, domain, lead["first_name"], lead["last_name"]
@@ -202,6 +202,46 @@ def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
     print(f"  Leads saved: {filepath} ({len(leads)} leads)")
 
     return leads
+
+
+def run_phase3(company: dict, state: dict, resume: bool) -> list[dict] | None:
+    company_name = company["Company Name"]
+
+    if resume and "phase3" in state["completed_phases"]:
+        existing = load_outreach(company_name)
+        if existing:
+            print("  [SKIP] Phase 3 already complete. Loading existing outreach.")
+            return existing
+
+    leads = load_leads(company_name)
+    if not leads:
+        print("  ERROR: No leads found for phase 3. Run Phase 2 first.")
+        return None
+
+    intel = load_intel(company_name)
+    if not intel:
+        print("  ERROR: No intel found for phase 3. Run Phase 1 first.")
+        return None
+
+    print("\n" + "=" * 60)
+    print("PHASE 3: OUTREACH GENERATION")
+    print("=" * 60)
+
+    gemini = get_gemini_client(config.GEMINI_API_KEY)
+    results = []
+
+    for i, lead in enumerate(leads):
+        name = f"{lead.get('first_name', '')} {lead.get('last_name', '')}".strip()
+        print(f"  [{i+1}/{len(leads)}] {name} @ {lead.get('company_name', '')}...")
+        outreach = generate_outreach(gemini, lead, intel)
+        results.append({**lead, **outreach})
+        if i < len(leads) - 1:
+            time.sleep(4)
+
+    filepath = save_outreach(company_name, results)
+    print(f"  Outreach saved: {filepath} ({len(results)} entries)")
+
+    return results
 
 
 def main():
@@ -282,6 +322,30 @@ def main():
                         f"{len(leads)} leads scored and saved. Leads sheet updated.",
                     )
                 print(f"  [OK] Phase 2 complete. {len(leads)} leads written to Google Sheets.")
+
+    # --- Phase 3 ---
+    if not args.phase or args.phase == 3:
+        if args.phase == 3 or "phase2" in state["completed_phases"]:
+            outreach = run_phase3(company, state, args.resume)
+
+            if outreach is None:
+                print("\nRun paused — Phase 3 could not complete.")
+                return
+
+            if "phase3" not in state["completed_phases"]:
+                print("\n  Writing outreach to Google Sheets...")
+                write_outreach(sheets, config.SPREADSHEET_ID, company["Company Name"], outreach)
+                state["completed_phases"].append("phase3")
+                save_state(args.company, state)
+
+                if config.DISCORD_WEBHOOK_UPDATES:
+                    phase_complete(
+                        config.DISCORD_WEBHOOK_UPDATES,
+                        "phase3",
+                        company["Company Name"],
+                        f"{len(outreach)} outreach templates generated. Outreach sheet updated.",
+                    )
+                print(f"  [OK] Phase 3 complete. {len(outreach)} outreach templates written to Google Sheets.")
 
     # Update last run tracking
     update_company_last_run(sheets, config.SPREADSHEET_ID, args.company)
