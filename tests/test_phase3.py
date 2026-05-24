@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import patch
 
 
 SAMPLE_LEAD = {
@@ -89,18 +89,16 @@ def test_parse_outreach_response_returns_empty_on_malformed_input():
 
 def test_generate_outreach_returns_required_keys():
     from modules.phase3_outreach import generate_outreach
-    mock_gemini = MagicMock()
-    mock_gemini.models.generate_content.return_value.text = SAMPLE_RESPONSE
-    result = generate_outreach(mock_gemini, SAMPLE_LEAD, SAMPLE_INTEL)
+    with patch("modules.phase3_outreach.generate_with_fallback", return_value=SAMPLE_RESPONSE):
+        result = generate_outreach(["fake-key"], SAMPLE_LEAD, SAMPLE_INTEL)
     for key in ["email_subject", "email_body", "call_script", "linkedin_message"]:
         assert key in result
 
 
 def test_generate_outreach_returns_error_key_on_exception():
     from modules.phase3_outreach import generate_outreach
-    mock_gemini = MagicMock()
-    mock_gemini.models.generate_content.side_effect = RuntimeError("quota exceeded")
-    result = generate_outreach(mock_gemini, SAMPLE_LEAD, SAMPLE_INTEL)
+    with patch("modules.phase3_outreach.generate_with_fallback", side_effect=RuntimeError("quota exceeded")):
+        result = generate_outreach(["fake-key"], SAMPLE_LEAD, SAMPLE_INTEL)
     assert "error" in result
     assert result["email_subject"] == ""
 

@@ -3,6 +3,7 @@ import io
 import json
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -12,12 +13,11 @@ if sys.platform == "win32":
 
 import config
 from modules.phase1_intel import build_scraping_tasks, prepare_claude_prompt, save_intel, load_intel
-from modules.phase2_prospecting import build_apollo_queries, score_lead, filter_leads, save_leads, load_leads, load_seen, filter_seen, save_seen
-from utils.gemini import get_client as get_gemini_client
+from modules.phase2_prospecting import build_search_queries, score_lead, filter_leads, save_leads, load_leads, load_seen, filter_seen, save_seen
 from modules.phase3_outreach import generate_outreach, save_outreach, load_outreach
 from utils.leads_finder import search_leads, extract_people as extract_leads_finder_people
 from utils.apify import get_client as get_apify_client, scrape_website, search_google
-from utils.discord import phase_complete, phase_error
+from utils.discord import send_notification, phase_complete, phase_error
 from utils.hunter import verify_email, find_email
 from utils.sheets import (
     get_client as get_sheets_client,
@@ -141,7 +141,7 @@ def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
     print("=" * 60)
 
     icp = intel.get("ideal_customer_profile", {})
-    queries = build_apollo_queries(intel)
+    queries = build_search_queries(intel)
     seen = load_seen(company_name)
     apify = get_apify_client(config.APIFY_TOKEN)
     all_people = []
@@ -208,10 +208,23 @@ def run_phase2(company: dict, state: dict, resume: bool) -> list[dict] | None:
     return leads
 
 
+def _process_batch(batch: list[dict], api_key: str, intel: dict, start_idx: int) -> list[tuple[int, dict]]:
+    results = []
+    for i, lead in enumerate(batch):
+        name = f"{lead.get('first_name', '')} {lead.get('last_name', '')}".strip()
+        print(f"  [{start_idx + i + 1}] {name} @ {lead.get('company_name', '')}...")
+        outreach = generate_outreach([api_key], lead, intel)
+        results.append((start_idx + i, {**lead, **outreach}))
+        if i < len(batch) - 1:
+            time.sleep(4)
+    return results
+
+
 def run_phase3(company: dict, state: dict, resume: bool) -> list[dict] | None:
     """
     Generates personalised outreach templates (email, call script, LinkedIn) for each
-    scored lead using Gemini 2.0 Flash. Saves to outreach.json and returns the results.
+    scored lead using Gemini 2.5 Flash. With 2 API keys, splits leads into 2 batches
+    processed concurrently — one batch per key. Falls back to sequential with 1 key.
     """
     company_name = company["Company Name"]
 
@@ -235,17 +248,23 @@ def run_phase3(company: dict, state: dict, resume: bool) -> list[dict] | None:
     print("PHASE 3: OUTREACH GENERATION")
     print("=" * 60)
 
-    gemini = get_gemini_client(config.GEMINI_API_KEY)
-    results = []
+    api_keys = [k for k in [config.GEMINI_API_KEY, config.GEMINI_API_KEY_2] if k]
+    ordered = [None] * len(leads)
 
-    for i, lead in enumerate(leads):
-        name = f"{lead.get('first_name', '')} {lead.get('last_name', '')}".strip()
-        print(f"  [{i+1}/{len(leads)}] {name} @ {lead.get('company_name', '')}...")
-        outreach = generate_outreach(gemini, lead, intel)
-        results.append({**lead, **outreach})
-        if i < len(leads) - 1:
-            time.sleep(4)
+    if len(api_keys) >= 2:
+        mid = len(leads) // 2
+        print(f"  Running 2 batches in parallel ({mid} + {len(leads) - mid} leads)...")
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            f1 = executor.submit(_process_batch, leads[:mid], api_keys[0], intel, 0)
+            f2 = executor.submit(_process_batch, leads[mid:], api_keys[1], intel, mid)
+            for idx, entry in f1.result() + f2.result():
+                ordered[idx] = entry
+    else:
+        print(f"  Running sequentially ({len(leads)} leads, 1 API key)...")
+        for idx, entry in _process_batch(leads, api_keys[0], intel, 0):
+            ordered[idx] = entry
 
+    results = ordered
     filepath = save_outreach(company_name, results)
     print(f"  Outreach saved: {filepath} ({len(results)} entries)")
 
@@ -283,9 +302,21 @@ def main():
     if state["completed_phases"]:
         print(f"Completed phases: {state['completed_phases']}")
 
+    if config.DISCORD_WEBHOOK_UPDATES:
+        send_notification(
+            config.DISCORD_WEBHOOK_UPDATES,
+            f"🚀 **Run started** — {company['Company Name']}\nPhases: {args.phase or '1→3'}",
+            "phase1",
+        )
+
     # --- Phase 1 ---
     if not args.phase or args.phase == 1:
-        intel = run_phase1(company, state, args.resume)
+        try:
+            intel = run_phase1(company, state, args.resume)
+        except Exception as e:
+            if config.DISCORD_WEBHOOK_LOGS:
+                phase_error(config.DISCORD_WEBHOOK_LOGS, "phase1", args.company, str(e))
+            raise
 
         if intel is None:
             print("\nRun paused — waiting for Claude Code analysis.")
@@ -310,7 +341,12 @@ def main():
     # --- Phase 2 ---
     if not args.phase or args.phase == 2:
         if args.phase == 2 or "phase1" in state["completed_phases"]:
-            leads = run_phase2(company, state, args.resume)
+            try:
+                leads = run_phase2(company, state, args.resume)
+            except Exception as e:
+                if config.DISCORD_WEBHOOK_LOGS:
+                    phase_error(config.DISCORD_WEBHOOK_LOGS, "phase2", args.company, str(e))
+                raise
 
             if leads is None:
                 print("\nRun paused — Phase 2 could not complete.")
@@ -323,18 +359,30 @@ def main():
                 save_state(args.company, state)
 
                 if config.DISCORD_WEBHOOK_LEADS:
+                    star_dist = {}
+                    for lead in leads:
+                        s = lead["scoring"]["stars"]
+                        star_dist[s] = star_dist.get(s, 0) + 1
+                    dist_line = " · ".join(
+                        f"{'⭐' * s} {n}" for s, n in sorted(star_dist.items(), reverse=True) if n
+                    )
                     phase_complete(
                         config.DISCORD_WEBHOOK_LEADS,
                         "phase2",
                         company["Company Name"],
-                        f"{len(leads)} leads scored and saved. Leads sheet updated.",
+                        f"{len(leads)} leads scored and saved.\n{dist_line}",
                     )
                 print(f"  [OK] Phase 2 complete. {len(leads)} leads written to Google Sheets.")
 
     # --- Phase 3 ---
     if not args.phase or args.phase == 3:
         if args.phase == 3 or "phase2" in state["completed_phases"]:
-            outreach = run_phase3(company, state, args.resume)
+            try:
+                outreach = run_phase3(company, state, args.resume)
+            except Exception as e:
+                if config.DISCORD_WEBHOOK_LOGS:
+                    phase_error(config.DISCORD_WEBHOOK_LOGS, "phase3", args.company, str(e))
+                raise
 
             if outreach is None:
                 print("\nRun paused — Phase 3 could not complete.")

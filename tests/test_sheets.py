@@ -68,6 +68,12 @@ def _mock_spreadsheet_with_missing_sheet(mock_sheet):
     mock_spreadsheet = MagicMock()
     mock_spreadsheet.worksheet.side_effect = gspread.WorksheetNotFound
     mock_spreadsheet.add_worksheet.return_value = mock_sheet
+    mock_spreadsheet.fetch_sheet_metadata.return_value = {"sheets": [
+        {"properties": {"title": "Cresta — Pipeline", "sheetId": 1}},
+        {"properties": {"title": "Cresta — Leads", "sheetId": 2}},
+        {"properties": {"title": "Cresta — Intelligence", "sheetId": 3}},
+        {"properties": {"title": "Cresta — Dashboard", "sheetId": 4}},
+    ]}
     mock_client = MagicMock()
     mock_client.open_by_key.return_value = mock_spreadsheet
     return mock_client, mock_spreadsheet, mock_sheet
@@ -112,8 +118,8 @@ def test_write_leads_appends_header_row():
     from utils.sheets import write_leads
     write_leads(mock_client, "fake_id", "Cresta", [_sample_lead()])
     first_call_args = mock_sheet.append_row.call_args[0][0]
-    assert "Stars" in first_call_args
-    assert "Email" in first_call_args
+    assert any("Stars" in h for h in first_call_args)
+    assert any("Email" in h for h in first_call_args)
 
 
 def test_write_leads_appends_lead_data_rows():
@@ -134,9 +140,16 @@ def _sample_outreach(stars=4):
         "last_name": "Doe",
         "title": "VP of CX",
         "email": "jane@acme.com",
+        "personal_phone": "",
         "linkedin_url": "https://linkedin.com/in/janedoe",
         "company_name": "Acme Corp",
         "company_industry": "Telecommunications",
+        "company_website": "https://acme.com",
+        "company_phone": "+1 408-555-0000",
+        "company_employees": 500,
+        "company_revenue": "100M",
+        "company_total_funding_clean": "50M",
+        "company_age": "15",
         "scoring": {"stars": stars},
         "email_subject": "AI for your contact center",
         "email_body": "Hi Jane, Cresta helps telecom teams...",
@@ -159,9 +172,17 @@ def test_write_outreach_writes_correct_headers():
     from utils.sheets import write_outreach
     write_outreach(mock_client, "fake_id", "Cresta", [_sample_outreach()])
     headers = mock_sheet.append_row.call_args[0][0]
-    assert headers[0] == "Company"
-    assert "Email Subject" in headers
-    assert "LinkedIn Message" in headers
+    assert "Stars" in headers[0]
+    assert any("Stage" in h for h in headers)
+    assert any("Notes" in h for h in headers)
+    assert any("Subject" in h for h in headers)
+    assert any("LinkedIn Message" in h for h in headers)
+    assert any("Phone" in h for h in headers)
+    assert any("Website" in h for h in headers)
+    assert any("Revenue" in h for h in headers)
+    assert any("Funding" in h for h in headers)
+    assert any("Age" in h for h in headers)
+    assert any("Employees" in h for h in headers)
 
 
 def test_write_outreach_sorts_rows_by_stars_descending():
@@ -171,7 +192,7 @@ def test_write_outreach_sorts_rows_by_stars_descending():
     leads = [_sample_outreach(stars=3), _sample_outreach(stars=5), _sample_outreach(stars=4)]
     write_outreach(mock_client, "fake_id", "Cresta", leads)
     rows = mock_sheet.append_rows.call_args[0][0]
-    # Stars is column index 7: Company(0) Industry(1) First(2) Last(3) Title(4) Email(5) LinkedIn(6) Stars(7)
-    assert rows[0][7] == 5
-    assert rows[1][7] == 4
-    assert rows[2][7] == 3
+    # Stars is column index 0
+    assert rows[0][0] == 5
+    assert rows[1][0] == 4
+    assert rows[2][0] == 3

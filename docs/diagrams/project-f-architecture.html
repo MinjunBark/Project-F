@@ -10,9 +10,8 @@
   h1 { text-align: center; font-size: 22px; color: #1a1a2e; margin-bottom: 6px; }
   .subtitle { text-align: center; font-size: 13px; color: #666; margin-bottom: 40px; }
 
-  .pipeline { display: flex; flex-direction: column; align-items: center; gap: 0; max-width: 900px; margin: 0 auto; }
+  .pipeline { display: flex; flex-direction: column; align-items: center; gap: 0; max-width: 960px; margin: 0 auto; }
 
-  /* Phase Sections */
   .phase-section { width: 100%; display: flex; align-items: flex-start; gap: 20px; margin-bottom: 0; }
   .phase-label {
     width: 110px; min-width: 110px; text-align: right; padding-top: 14px;
@@ -20,69 +19,44 @@
   }
   .phase-content { flex: 1; display: flex; flex-direction: column; align-items: center; }
 
-  /* Boxes */
   .box {
     border-radius: 8px; padding: 10px 18px; text-align: center;
-    font-size: 13px; font-weight: 600; border: 2px solid; min-width: 200px; max-width: 340px; width: 100%;
+    font-size: 13px; font-weight: 600; border: 2px solid; min-width: 200px; max-width: 380px; width: 100%;
   }
   .box-input    { background: #e8f4fd; border-color: #4a90d9; color: #1a5276; }
   .box-trigger  { background: #fef9e7; border-color: #f39c12; color: #7d6608; }
   .box-orch     { background: #eaf2ff; border-color: #2e86c1; color: #1a5276; }
-  .box-p1       { background: #e8f8f5; border-color: #1abc9c; color: #0e6655; }
-  .box-p2       { background: #fdf2f8; border-color: #9b59b6; color: #6c3483; }
-  .box-p3       { background: #fef9e7; border-color: #f39c12; color: #7d6608; }
-  .box-p4       { background: #eaf2ff; border-color: #2980b9; color: #1a5276; }
-  .box-p5       { background: #fdedec; border-color: #e74c3c; color: #922b21; }
   .box-output   { background: #eafaf1; border-color: #27ae60; color: #1e8449; }
-  .box-discord  { background: #f0f0ff; border-color: #7289da; color: #3d4a8a; }
-  .box-tool     { background: #f9f9f9; border-color: #bbb; color: #555; font-size: 11px; font-weight: 500; padding: 6px 12px; min-width: 120px; }
+  .box-manual   { background: #fff8e1; border-color: #ff8f00; color: #7d4a00; }
 
-  /* Arrows */
   .arrow { width: 2px; background: #ccc; height: 28px; margin: 0 auto; position: relative; }
   .arrow::after { content: '▼'; position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%); color: #aaa; font-size: 14px; }
 
-  /* Horizontal rows */
   .row { display: flex; gap: 12px; justify-content: center; align-items: flex-start; flex-wrap: wrap; width: 100%; }
   .col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 
-  /* Sub-boxes inside phases */
   .sub-box {
     border-radius: 6px; padding: 7px 14px; text-align: center;
-    font-size: 12px; border: 1.5px solid; min-width: 150px; max-width: 200px;
+    font-size: 12px; border: 1.5px solid; min-width: 150px; max-width: 210px;
   }
 
-  /* Tools sidebar */
   .tools-note {
     font-size: 11px; color: #999; font-style: italic;
     text-align: center; margin-top: 4px;
   }
 
-  /* Section dividers */
-  .section-wrap {
-    width: 100%; border-left: 4px solid #ddd; padding-left: 16px; margin: 4px 0 4px 110px;
-    position: relative;
-  }
-
-  /* Tool badge */
   .badge {
     display: inline-block; padding: 2px 8px; border-radius: 12px;
     font-size: 10px; font-weight: 700; margin: 2px 2px 0 2px;
     text-transform: uppercase; letter-spacing: 0.5px;
   }
-  .badge-apollo  { background: #e8d5f5; color: #6c3483; }
   .badge-apify   { background: #d5e8d4; color: #2e7d32; }
   .badge-hunter  { background: #fff3cd; color: #856404; }
   .badge-claude  { background: #cce5ff; color: #004085; }
   .badge-sheets  { background: #d4edda; color: #155724; }
   .badge-discord { background: #e8eaf6; color: #3949ab; }
   .badge-gemini  { background: #fce4ec; color: #880e4f; }
-
-  .connector-h {
-    display: flex; align-items: center; justify-content: center;
-    gap: 0; width: 100%;
-  }
-  .h-line { height: 2px; background: #ccc; flex: 1; max-width: 60px; }
-  .h-arrow { color: #aaa; font-size: 13px; }
+  .badge-manual  { background: #fff3e0; color: #e65100; }
 
   .phase-pill {
     display: inline-block; padding: 3px 12px; border-radius: 20px;
@@ -92,13 +66,34 @@
   .pill-p1 { background: #1abc9c; color: white; }
   .pill-p2 { background: #9b59b6; color: white; }
   .pill-p3 { background: #f39c12; color: white; }
-  .pill-p4 { background: #2980b9; color: white; }
-  .pill-p5 { background: #e74c3c; color: white; }
+  .pill-p4 { background: #e74c3c; color: white; }
 
-  .side-label {
-    position: absolute; right: -130px; top: 50%; transform: translateY(-50%);
-    font-size: 11px; color: #999; font-style: italic; white-space: nowrap;
+  .auto-tag {
+    display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 6px;
+    border-radius: 10px; letter-spacing: 0.5px; vertical-align: middle; margin-left: 4px;
   }
+  .auto-full  { background: #c8e6c9; color: #1b5e20; }
+  .auto-semi  { background: #fff9c4; color: #f57f17; }
+  .auto-none  { background: #ffcdd2; color: #b71c1c; }
+
+  .timing-tag {
+    display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 7px;
+    border-radius: 10px; background: #eceff1; color: #546e7a;
+    vertical-align: middle; margin-left: 4px; letter-spacing: 0.3px;
+  }
+
+  .opportunity {
+    width: 100%; background: #e3f2fd; border: 1px dashed #1976d2; border-radius: 6px;
+    padding: 6px 12px; font-size: 11px; color: #1565c0; margin-top: 8px;
+    text-align: center;
+  }
+  .opportunity::before { content: '⚡ Automation opportunity: '; font-weight: 700; }
+
+  .warning-box {
+    width: 100%; background: #fff3e0; border: 1px solid #ff9800; border-radius: 6px;
+    padding: 8px 14px; font-size: 11px; color: #e65100; margin-top: 8px;
+  }
+  .warning-box strong { display: block; margin-bottom: 3px; }
 
   .divider { width: 80%; height: 1px; background: #e0e0e0; margin: 20px auto; }
 
@@ -108,17 +103,17 @@
 <body>
 
 <h1>Project F — Lead Generation Pipeline</h1>
-<p class="subtitle">Modular Python Orchestration · On-Demand · Local → Cloud Migration Path</p>
+<p class="subtitle">Current state (2026-05-24) · Python orchestrator · Manual trigger · One company at a time</p>
 
 <div class="pipeline">
 
   <!-- INPUT -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:960px;">
     <div class="phase-label" style="color:#4a90d9;">INPUT</div>
     <div class="phase-content">
       <div class="box box-input">
         📋 Google Sheet — Company List<br>
-        <span style="font-size:11px;font-weight:400;">User selects: <em>"Focus on Cresta"</em></span>
+        <span style="font-size:11px;font-weight:400;">Rows: Company Name · Website · Status (Active/Paused) · Last Run · Notes</span>
       </div>
       <span class="badge badge-sheets">Google Sheets API</span>
     </div>
@@ -127,27 +122,14 @@
   <div class="arrow" style="margin-left:130px;"></div>
 
   <!-- TRIGGER -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:960px;">
     <div class="phase-label" style="color:#f39c12;">TRIGGER</div>
     <div class="phase-content">
       <div class="box box-trigger">
         💻 python orchestrator.py --company Cresta<br>
-        <span style="font-size:11px;font-weight:400;">Validates company · loads state.json · runs phases 1→5</span>
+        <span style="font-size:11px;font-weight:400;">Validates company → loads state.json → runs phases 1→3 → sends Discord updates</span>
       </div>
-    </div>
-  </div>
-
-  <div class="arrow" style="margin-left:130px;"></div>
-
-  <!-- ORCHESTRATOR -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
-    <div class="phase-label" style="color:#2e86c1;">CORE</div>
-    <div class="phase-content">
-      <div class="box box-orch">
-        ⚙️ orchestrator.py<br>
-        <span style="font-size:11px;font-weight:400;">Coordinates phases · saves state · sends Discord updates</span>
-      </div>
-      <span class="badge badge-discord">Discord Webhooks</span>
+      <div class="opportunity">Schedule via n8n or cron to run nightly / weekly without manual trigger</div>
     </div>
   </div>
 
@@ -155,34 +137,35 @@
   <div class="divider"></div>
 
   <!-- PHASE 1 -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:960px;">
     <div class="phase-label" style="color:#1abc9c;">PHASE 1</div>
     <div class="phase-content">
-      <span class="phase-pill pill-p1">Company Intelligence</span>
+      <span class="phase-pill pill-p1">Company Intelligence <span class="auto-tag auto-semi">Semi-Auto</span><span class="timing-tag">⏱ ~15–30 min</span></span>
       <div class="row">
         <div class="col">
           <div class="sub-box" style="background:#e8f8f5;border-color:#1abc9c;color:#0e6655;">
-            Market Positioning<br><span style="font-size:10px;">Value prop · differentiators</span>
+            Apify Scraper<br><span style="font-size:10px;">cresta.com · blog · G2 · Crunchbase<br>LinkedIn · news · job posts</span>
+          </div>
+        </div>
+        <div class="col">
+          <div class="sub-box" style="background:#fff8e1;border-color:#ff8f00;color:#7d4a00;">
+            🖐 Claude Code Analysis<br><span style="font-size:10px;font-weight:700;">MANUAL STEP</span><br>
+            <span style="font-size:10px;">Paste prompt → Claude → save company_intel.json → re-run --resume</span>
           </div>
         </div>
         <div class="col">
           <div class="sub-box" style="background:#e8f8f5;border-color:#1abc9c;color:#0e6655;">
-            ICP Profile<br><span style="font-size:10px;">Industries · titles · tech stack · signals</span>
-          </div>
-        </div>
-        <div class="col">
-          <div class="sub-box" style="background:#e8f8f5;border-color:#1abc9c;color:#0e6655;">
-            Competitor Analysis<br><span style="font-size:10px;">Differentiators · win/loss</span>
+            Extracted Intel<br><span style="font-size:10px;">Value prop · ICP · competitor analysis<br>Tech stack · buying signals</span>
           </div>
         </div>
       </div>
       <div style="margin-top:8px;">
-        <span class="badge badge-apify">Apify Scraper</span>
-        <span class="badge badge-claude">Claude Code (AI)</span>
-        <span class="badge badge-sheets">→ Sheet 2</span>
+        <span class="badge badge-apify">Apify</span>
+        <span class="badge badge-claude">Claude Code (Manual)</span>
+        <span class="badge badge-sheets">→ Intelligence Tab</span>
       </div>
-      <div class="tools-note">Sources: cresta.com · blog · G2 · Crunchbase · LinkedIn · news · job posts</div>
       <div class="tools-note" style="color:#1abc9c;">Output: company_intel.json</div>
+      <div class="opportunity">Replace Claude Code manual step with Gemini API call — fully automates Phase 1</div>
     </div>
   </div>
 
@@ -190,36 +173,38 @@
   <div class="divider"></div>
 
   <!-- PHASE 2 -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:960px;">
     <div class="phase-label" style="color:#9b59b6;">PHASE 2</div>
     <div class="phase-content">
-      <span class="phase-pill pill-p2">Prospecting</span>
+      <span class="phase-pill pill-p2">Prospecting <span class="auto-tag auto-full">Fully Auto</span><span class="timing-tag">⏱ ~5–12 min</span></span>
       <div class="row">
         <div class="col">
           <div class="sub-box" style="background:#fdf2f8;border-color:#9b59b6;color:#6c3483;">
-            Apollo API Search<br><span style="font-size:10px;">Filter by ICP: industry · titles · size · tech</span>
-          </div>
-          <div style="font-size:20px;color:#ccc;">↓</div>
-          <div class="sub-box" style="background:#fdf2f8;border-color:#9b59b6;color:#6c3483;">
-            15–30 Contacts<br><span style="font-size:10px;">Name · title · email · phone · company</span>
+            code_crafter/leads-finder<br><span style="font-size:10px;">Apify actor · ICP-targeted search<br>Titles · industry · company size</span>
           </div>
         </div>
         <div class="col">
           <div class="sub-box" style="background:#fdf2f8;border-color:#9b59b6;color:#6c3483;">
-            Apify Enrichment<br><span style="font-size:10px;">Website · job posts · news · LinkedIn</span>
+            Scoring Rubric<br>
+            <span style="font-size:10px;">
+              ICP Fit 40% · Decision Maker 30%<br>
+              Buying Signals 20% · Data 10%<br>
+              → ⭐ Star rating (1–5)
+            </span>
           </div>
-          <div style="font-size:20px;color:#ccc;">↓</div>
+        </div>
+        <div class="col">
           <div class="sub-box" style="background:#fdf2f8;border-color:#9b59b6;color:#6c3483;">
-            Hunter.io Verify<br><span style="font-size:10px;">Email deliverability check per contact</span>
+            Hunter.io Verify<br><span style="font-size:10px;">Email deliverability per contact<br>Find missing emails by domain</span>
           </div>
         </div>
       </div>
       <div style="margin-top:8px;">
-        <span class="badge badge-apollo">Apollo.io API</span>
-        <span class="badge badge-apify">Apify</span>
+        <span class="badge badge-apify">Apify (code_crafter)</span>
         <span class="badge badge-hunter">Hunter.io</span>
+        <span class="badge badge-sheets">→ Leads Tab</span>
       </div>
-      <div class="tools-note" style="color:#9b59b6;">Output: raw_leads.json (15–30 enriched records)</div>
+      <div class="tools-note" style="color:#9b59b6;">Output: raw_leads.json · 3★+ leads proceed to Phase 3</div>
     </div>
   </div>
 
@@ -227,151 +212,120 @@
   <div class="divider"></div>
 
   <!-- PHASE 3 -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:960px;">
     <div class="phase-label" style="color:#f39c12;">PHASE 3</div>
     <div class="phase-content">
-      <span class="phase-pill pill-p3">Scoring & Filtering</span>
+      <span class="phase-pill pill-p3">Outreach Generation <span class="auto-tag auto-full">Fully Auto</span><span class="timing-tag">⏱ ~6–10 min (2 keys) · ~15 min (1 key)</span></span>
       <div class="row">
         <div class="col">
-          <div class="sub-box" style="background:#fdedec;border-color:#e74c3c;color:#922b21;">
-            Hard Disqualifiers<br><span style="font-size:10px;">Auto-reject: &lt;50 agents · no phone system · wrong industry</span>
-          </div>
-        </div>
-        <div class="col">
           <div class="sub-box" style="background:#fef9e7;border-color:#f39c12;color:#7d6608;">
-            Weighted Rubric<br>
-            <span style="font-size:10px;">
-              ICP Fit 40% · Decision Maker 30%<br>
-              Buying Signals 20% · Data 10%
-            </span>
-          </div>
-        </div>
-        <div class="col">
-          <div class="sub-box" style="background:#fef9e7;border-color:#f39c12;color:#7d6608;">
-            ⭐ Star Rating<br>
-            <span style="font-size:10px;">
-              ⭐⭐⭐⭐⭐ 85–100 Priority<br>
-              ⭐⭐⭐⭐ 70–84 Standard<br>
-              ⭐⭐⭐ 55–69 Lower priority
-            </span>
-          </div>
-        </div>
-      </div>
-      <div style="margin-top:8px;">
-        <span class="badge badge-claude">Claude Code (AI)</span>
-        <span class="badge badge-sheets">→ Sheet 3</span>
-      </div>
-      <div class="tools-note" style="color:#f39c12;">Output: scored_leads.json · Only 3★+ proceed to Phase 4</div>
-    </div>
-  </div>
-
-  <div class="arrow" style="margin-left:130px;"></div>
-  <div class="divider"></div>
-
-  <!-- PHASE 4 -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
-    <div class="phase-label" style="color:#2980b9;">PHASE 4</div>
-    <div class="phase-content">
-      <span class="phase-pill pill-p4">Outreach Templates</span>
-      <div class="row">
-        <div class="col">
-          <div class="sub-box" style="background:#eaf2ff;border-color:#2980b9;color:#1a5276;">
             📧 Cold Email<br>
-            <span style="font-size:10px;">
-              3 subject variants · Personalized hook<br>
-              Pain point bridge · Proof · CTA
-            </span>
+            <span style="font-size:10px;">Personalised subject + body<br>Pain point bridge · Proof · CTA</span>
           </div>
         </div>
         <div class="col">
-          <div class="sub-box" style="background:#eaf2ff;border-color:#2980b9;color:#1a5276;">
-            📞 Cold Call Script<br>
-            <span style="font-size:10px;">
-              Opening · Permission · Hook<br>
-              Qualifying Qs · Objection handlers · CTA
-            </span>
+          <div class="sub-box" style="background:#fef9e7;border-color:#f39c12;color:#7d6608;">
+            📞 Call Script<br>
+            <span style="font-size:10px;">Opener · Hook · Qualifying Qs<br>Objection handlers · CTA</span>
+          </div>
+        </div>
+        <div class="col">
+          <div class="sub-box" style="background:#fef9e7;border-color:#f39c12;color:#7d6608;">
+            💬 LinkedIn Message<br>
+            <span style="font-size:10px;">Connection note<br>Personalised to role + company</span>
           </div>
         </div>
       </div>
       <div style="margin-top:8px;">
-        <span class="badge badge-claude">Claude Code (AI)</span>
-        <span class="badge badge-sheets">→ Sheet 3</span>
+        <span class="badge badge-gemini">Gemini 2.5 Flash (Dual Key Parallel)</span>
+        <span class="badge badge-sheets">→ Pipeline Tab (CRM)</span>
       </div>
-      <div class="tools-note">Tailored per prospect using their trigger events, tech stack, pain points + Cresta's proven results</div>
-      <div class="tools-note" style="color:#2980b9;">Output: outreach.json · /outreach/cresta/[company].md (per lead)</div>
+      <div class="tools-note" style="color:#f39c12;">Output: outreach.json · Pipeline tab — 25-col CRM with Stage tracking</div>
+      <div class="warning-box">
+        <strong>⚠️ Known Issue — Long Run Time (20+ min observed)</strong>
+        <b>Root cause:</b> Gemini API rate limiting enforces a 4s sleep between each API call per key. With 1 key and 100 leads this is ~12–15 min minimum; quota exhaustion or API errors (e.g. model deprecation mid-run) can push it to 20+ min.<br>
+        <b>Current mitigation:</b> Dual API key parallel batching splits leads 50/50 across 2 Gemini keys, halving runtime to ~6–10 min.<br>
+        <b>To investigate further:</b> Check Gemini quota usage in Google AI Studio · reduce sleep from 4s to 2s if RPM allows · add a 3rd API key for 3-way split.
+      </div>
     </div>
   </div>
 
   <div class="arrow" style="margin-left:130px;"></div>
   <div class="divider"></div>
 
-  <!-- OUTPUTS -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
+  <!-- DISCORD -->
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:960px;">
+    <div class="phase-label" style="color:#7289da;">NOTIFY</div>
+    <div class="phase-content">
+      <div class="box" style="background:#f0f0ff;border-color:#7289da;color:#3d4a8a;">
+        🔔 Discord Notifications<br>
+        <span style="font-size:11px;font-weight:400;">Phase complete · Lead counts · Errors · Warnings</span>
+      </div>
+      <span class="badge badge-discord">3 Webhooks: #lead-gen-updates · #cresta-leads · #system-logs</span>
+      <div class="tools-note" style="color:#7289da;">✅ Live — webhooks configured and tested · errors auto-route to #system-logs</div>
+    </div>
+  </div>
+
+  <div class="arrow" style="margin-left:130px;"></div>
+  <div class="divider"></div>
+
+  <!-- OUTPUT -->
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:960px;">
     <div class="phase-label" style="color:#27ae60;">OUTPUT</div>
     <div class="phase-content">
-      <div class="row">
-        <div class="col">
-          <div class="box box-output" style="min-width:160px;max-width:220px;">
-            📊 Sales Team<br>
-            <span style="font-size:11px;font-weight:400;">Phone numbers + call scripts<br>for cold outreach</span>
-          </div>
-        </div>
-        <div class="col">
-          <div class="box box-output" style="min-width:160px;max-width:220px;">
-            📣 Marketing Team<br>
-            <span style="font-size:11px;font-weight:400;">Verified emails + templates<br>for campaigns + ad targeting</span>
-          </div>
-        </div>
+      <div class="box box-output">
+        📊 Google Sheet CRM — Pipeline Tab<br>
+        <span style="font-size:11px;font-weight:400;">
+          25 cols: Stars · Stage · Contact Info · Outreach Content · Company Intel<br>
+          100 leads · sorted by star rating · Stage dropdown + row color coding
+        </span>
       </div>
+      <span class="badge badge-sheets">Google Sheets API</span>
+      <div class="tools-note">Sales team works directly from the sheet: call scripts, email templates, LinkedIn messages, phone numbers</div>
     </div>
   </div>
 
   <div class="arrow" style="margin-left:130px;"></div>
   <div class="divider"></div>
 
-  <!-- PHASE 5 -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
-    <div class="phase-label" style="color:#e74c3c;">PHASE 5</div>
+  <!-- PHASE 4 PLANNED -->
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:960px;">
+    <div class="phase-label" style="color:#e74c3c;">PHASE 4</div>
     <div class="phase-content">
-      <span class="phase-pill pill-p5">Feedback Loop</span>
+      <span class="phase-pill pill-p4">Feedback Loop <span class="auto-tag auto-none">Planned</span></span>
       <div class="row">
         <div class="col">
           <div class="sub-box" style="background:#fdedec;border-color:#e74c3c;color:#922b21;">
-            Human In Loop<br>
-            <span style="font-size:10px;">Sales + Marketing update Sheet 3<br>Outcome · Score accuracy · Notes</span>
+            Human-in-Loop<br>
+            <span style="font-size:10px;">Sales team updates Stage<br>Won · Lost · No Reply · Meeting</span>
           </div>
         </div>
         <div class="col">
           <div class="sub-box" style="background:#fdedec;border-color:#e74c3c;color:#922b21;">
-            Pattern Analysis<br>
-            <span style="font-size:10px;">What signals predicted success?<br>What were false positives?</span>
+            Signal Analysis<br>
+            <span style="font-size:10px;">What signals predicted success?<br>False positives? Template quality?</span>
           </div>
         </div>
         <div class="col">
           <div class="sub-box" style="background:#fdedec;border-color:#e74c3c;color:#922b21;">
-            Approved Changes<br>
-            <span style="font-size:10px;">Refine scoring weights · ICP signals<br>Disqualifiers · Templates</span>
+            Refine ICP<br>
+            <span style="font-size:10px;">Update scoring weights · signals<br>Disqualifiers · Prompt tuning</span>
           </div>
         </div>
       </div>
-      <div style="margin-top:8px;">
-        <span class="badge badge-claude">Claude Code (AI)</span>
-        <span class="badge badge-discord">Discord #feedback</span>
-        <span class="badge badge-sheets">Sheet 3 Tracking</span>
-      </div>
-      <div class="tools-note" style="color:#e74c3c;">Each run makes the next run smarter · Version-logged improvements</div>
+      <div class="tools-note" style="color:#e74c3c;">Each run makes the next run smarter</div>
     </div>
   </div>
 
   <div class="arrow" style="margin-left:130px;height:40px;"></div>
 
   <!-- LOOP BACK -->
-  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:900px;">
+  <div style="display:flex;align-items:flex-start;gap:20px;width:100%;max-width:960px;">
     <div class="phase-label"></div>
     <div class="phase-content">
       <div class="box box-trigger" style="border-style:dashed;">
-        🔄 Next Run — Smarter ICP · Better Scoring · Higher Quality Leads<br>
-        <span style="font-size:11px;font-weight:400;">Future: Scheduled via n8n · AI via Gemini API (free)</span>
+        🔄 Next Run — New batch of leads · Refined ICP · Better scoring<br>
+        <span style="font-size:11px;font-weight:400;">Add companies: update Company List sheet → run orchestrator.py --company [Name]</span>
       </div>
     </div>
   </div>
@@ -379,20 +333,79 @@
 </div>
 
 <!-- LEGEND -->
-<div style="max-width:900px;margin:40px auto 0;padding:20px;background:white;border-radius:10px;border:1px solid #eee;">
+<div style="max-width:960px;margin:40px auto 0;padding:20px;background:white;border-radius:10px;border:1px solid #eee;">
   <div style="font-size:12px;font-weight:700;color:#666;margin-bottom:10px;letter-spacing:1px;text-transform:uppercase;">Tool Legend</div>
-  <div style="display:flex;flex-wrap:wrap;gap:8px;">
-    <span class="badge badge-apollo" style="font-size:11px;padding:4px 10px;">Apollo.io — Lead Database</span>
-    <span class="badge badge-apify" style="font-size:11px;padding:4px 10px;">Apify — Web Scraping</span>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+    <span class="badge badge-apify" style="font-size:11px;padding:4px 10px;">Apify — Web Scraping + Lead Search</span>
     <span class="badge badge-hunter" style="font-size:11px;padding:4px 10px;">Hunter.io — Email Verification</span>
-    <span class="badge badge-claude" style="font-size:11px;padding:4px 10px;">Claude Code — AI (Manual Phase)</span>
-    <span class="badge badge-gemini" style="font-size:11px;padding:4px 10px;">Gemini API — AI (Automated Phase)</span>
-    <span class="badge badge-sheets" style="font-size:11px;padding:4px 10px;">Google Sheets — Data + UI</span>
-    <span class="badge badge-discord" style="font-size:11px;padding:4px 10px;">Discord — Team Communication</span>
+    <span class="badge badge-claude" style="font-size:11px;padding:4px 10px;">Claude Code — Manual AI Analysis (Phase 1)</span>
+    <span class="badge badge-gemini" style="font-size:11px;padding:4px 10px;">Gemini 2.5 Flash — Automated Outreach AI</span>
+    <span class="badge badge-sheets" style="font-size:11px;padding:4px 10px;">Google Sheets — Input + CRM Output</span>
+    <span class="badge badge-discord" style="font-size:11px;padding:4px 10px;">Discord — Phase Notifications</span>
   </div>
+  <div style="font-size:12px;font-weight:700;color:#666;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase;">Automation Status</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+    <span class="auto-tag auto-full" style="font-size:11px;padding:3px 10px;">Fully Auto — Phases 2 &amp; 3</span>
+    <span class="auto-tag auto-semi" style="font-size:11px;padding:3px 10px;">Semi-Auto — Phase 1 (manual Claude Code step)</span>
+    <span class="auto-tag auto-none" style="font-size:11px;padding:3px 10px;">Planned — Phase 4 feedback loop</span>
+  </div>
+  <div style="font-size:12px;font-weight:700;color:#666;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;">Runtime Estimates (per full pipeline run)</div>
+  <table style="width:100%;border-collapse:collapse;font-size:12px;">
+    <thead>
+      <tr style="background:#f5f5f5;text-align:left;">
+        <th style="padding:6px 10px;border:1px solid #e0e0e0;">Phase</th>
+        <th style="padding:6px 10px;border:1px solid #e0e0e0;">Step</th>
+        <th style="padding:6px 10px;border:1px solid #e0e0e0;">Typical Time</th>
+        <th style="padding:6px 10px;border:1px solid #e0e0e0;">Bottleneck / Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#0e6655;font-weight:600;">Phase 1</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">Apify scraping</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">3–5 min</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#999;">Apify actor queue + page count</td>
+      </tr>
+      <tr style="background:#fafafa;">
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#0e6655;font-weight:600;">Phase 1</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">Claude Code analysis (manual)</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">10–25 min</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#e65100;">Human step — varies by prompt complexity</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#6c3483;font-weight:600;">Phase 2</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">Leads-finder actor + scoring</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">3–7 min</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#999;">Apify actor queue + result count</td>
+      </tr>
+      <tr style="background:#fafafa;">
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#6c3483;font-weight:600;">Phase 2</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">Hunter.io email verify</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">2–5 min</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#999;">1 API call per lead</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#7d6608;font-weight:600;">Phase 3</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">Gemini outreach (2 API keys)</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">6–10 min</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#999;">4s sleep/call × 50 leads per batch (parallel)</td>
+      </tr>
+      <tr style="background:#fff3e0;">
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#e65100;font-weight:600;">Phase 3</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">Gemini outreach (1 API key)</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#e65100;font-weight:600;">12–20+ min ⚠️</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#e65100;">4s sleep/call × 100 leads sequential — quota errors add retries</td>
+      </tr>
+      <tr style="background:#f5f5f5;font-weight:600;">
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;" colspan="2">Full pipeline (2 keys)</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;">~25–45 min</td>
+        <td style="padding:6px 10px;border:1px solid #e0e0e0;color:#999;">Phase 1 manual step is the largest variable</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
-<footer>Project F · Architecture Diagram · 2026-05-22 · Claude Code</footer>
+<footer>Project F · Architecture Diagram · 2026-05-24 · v3 (timing + known issues added)</footer>
 
 </body>
 </html>

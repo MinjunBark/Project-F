@@ -3,7 +3,15 @@ from datetime import datetime
 from pathlib import Path
 
 
-def build_apollo_queries(intel: dict) -> list[dict]:
+def _stars(total: int) -> int:
+    if total >= 80: return 5
+    if total >= 60: return 4
+    if total >= 40: return 3
+    if total >= 20: return 2
+    return 1
+
+
+def build_search_queries(intel: dict) -> list[dict]:
     icp = intel.get("ideal_customer_profile", {})
     titles = icp.get("decision_maker_titles", [])[:6]
     return [
@@ -69,14 +77,7 @@ def score_lead(person: dict, icp: dict) -> dict:
         scores["data_completeness"] += 1
 
     total = sum(scores.values())
-    stars = (
-        5 if total >= 80 else
-        4 if total >= 60 else
-        3 if total >= 40 else
-        2 if total >= 20 else
-        1
-    )
-    return {"scores": scores, "total": total, "stars": stars}
+    return {"scores": scores, "total": total, "stars": _stars(total)}
 
 
 def filter_leads(scored_leads: list[dict], min_stars: int = 3, max_leads: int = 30) -> list[dict]:

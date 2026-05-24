@@ -32,31 +32,31 @@ def _make_person(**overrides):
         "company_website": "https://acme.com",
         "company_industry": "Telecommunications",
         "company_employees": 5000,
-        "apollo_id": "abc123",
+
     }
     base.update(overrides)
     return base
 
 
-# --- build_apollo_queries ---
+# --- build_search_queries ---
 
-def test_build_apollo_queries_returns_list():
-    from modules.phase2_prospecting import build_apollo_queries
-    queries = build_apollo_queries(SAMPLE_INTEL)
+def test_build_search_queries_returns_list():
+    from modules.phase2_prospecting import build_search_queries
+    queries = build_search_queries(SAMPLE_INTEL)
     assert isinstance(queries, list)
     assert len(queries) >= 1
 
 
-def test_build_apollo_queries_includes_titles():
-    from modules.phase2_prospecting import build_apollo_queries
-    queries = build_apollo_queries(SAMPLE_INTEL)
+def test_build_search_queries_includes_titles():
+    from modules.phase2_prospecting import build_search_queries
+    queries = build_search_queries(SAMPLE_INTEL)
     assert len(queries[0]["titles"]) >= 1
     assert any("VP" in t or "Director" in t or "Chief" in t for t in queries[0]["titles"])
 
 
-def test_build_apollo_queries_includes_employee_ranges():
-    from modules.phase2_prospecting import build_apollo_queries
-    queries = build_apollo_queries(SAMPLE_INTEL)
+def test_build_search_queries_includes_employee_ranges():
+    from modules.phase2_prospecting import build_search_queries
+    queries = build_search_queries(SAMPLE_INTEL)
     assert len(queries[0]["employee_ranges"]) >= 1
 
 

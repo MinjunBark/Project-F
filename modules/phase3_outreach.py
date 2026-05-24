@@ -2,7 +2,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 
-from utils.gemini import generate as _gemini_generate
+from utils.gemini import generate_with_fallback
 
 _SIGNAL_KEYWORDS = {
     "genesys": "Genesys",
@@ -92,10 +92,10 @@ def parse_outreach_response(text: str) -> dict:
     return result
 
 
-def generate_outreach(gemini_client, lead: dict, intel: dict) -> dict:
+def generate_outreach(api_keys: list[str], lead: dict, intel: dict) -> dict:
     prompt = build_outreach_prompt(lead, intel)
     try:
-        text = _gemini_generate(gemini_client, prompt)
+        text = generate_with_fallback(api_keys, prompt)
         return parse_outreach_response(text)
     except Exception as e:
         keys = ["email_subject", "email_body", "call_script", "linkedin_message"]

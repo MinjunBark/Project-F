@@ -17,5 +17,5 @@ def test_generate_returns_text():
     result = generate(mock_client, "test prompt")
     assert result == "hello world"
     mock_client.models.generate_content.assert_called_once_with(
-        model="gemini-2.0-flash", contents="test prompt"
+        model="gemini-2.5-flash", contents="test prompt"
     )
