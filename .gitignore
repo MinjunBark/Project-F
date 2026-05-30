@@ -1,7 +1,64 @@
+# ── Secrets & credentials ─────────────────────────────────────────────────────
 .env
+.env.local
+.env.*.local
 credentials.json
 project-f-*.json
+*-service-account.json
+*-credentials.json
+
+# Keep templates/examples
+!*.env.example
+!*-template.env
+
+# ── AI context directories ────────────────────────────────────────────────────
+.claude/
+.cursor/
+.copilot/
+.aider/
+
+# ── Runtime output & pipeline artifacts ──────────────────────────────────────
+apply_pipeline_output.txt
+*.log
 data/
+
+# ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.mypy_cache/
+.ruff_cache/
+.pytype/
+
+# ── Testing ───────────────────────────────────────────────────────────────────
 .pytest_cache/
+.coverage
+htmlcov/
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ── Editor ────────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
